@@ -17,7 +17,8 @@ export async function proxy(req: NextRequest) {
     pathname.startsWith("/api/health") ||
     pathname.startsWith("/cards/") ||
     pathname.startsWith("/mockups/") ||
-    pathname.startsWith("/uploads/");
+    pathname.startsWith("/uploads/") ||
+    pathname.startsWith("/brand/");
 
   if (publicPath) return NextResponse.next();
 

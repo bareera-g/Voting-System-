@@ -21,71 +21,63 @@ async function main() {
 
   const passwordHash = await bcrypt.hash("cerebri", 10);
 
-  const [ceo, cpo, cto, design, finance, cs, viewer] = await Promise.all([
-    prisma.user.create({
-      data: {
-        email: "amira.hassan@cerebri.ai",
-        name: "Amira Hassan",
-        title: "Chief Executive Officer",
-        role: "VOTER",
-        passwordHash,
-      },
-    }),
-    prisma.user.create({
-      data: {
-        email: "julian.okonkwo@cerebri.ai",
-        name: "Julian Okonkwo",
-        title: "Chief Product Officer",
-        role: "ADMIN",
-        passwordHash,
-      },
-    }),
-    prisma.user.create({
-      data: {
-        email: "priya.shah@cerebri.ai",
-        name: "Priya Shah",
-        title: "Chief Technology Officer",
-        role: "VOTER",
-        passwordHash,
-      },
-    }),
-    prisma.user.create({
-      data: {
-        email: "nora.klein@cerebri.ai",
-        name: "Nora Klein",
-        title: "Head of Design",
-        role: "ADMIN",
-        passwordHash,
-      },
-    }),
-    prisma.user.create({
-      data: {
-        email: "david.cho@cerebri.ai",
-        name: "David Cho",
-        title: "VP Finance / T&E",
-        role: "VOTER",
-        passwordHash,
-      },
-    }),
-    prisma.user.create({
-      data: {
-        email: "samira.elamin@cerebri.ai",
-        name: "Samira Elamin",
-        title: "VP Customer Success",
-        role: "VOTER",
-        passwordHash,
-      },
-    }),
-    prisma.user.create({
-      data: {
-        email: "alex.brooks@cerebri.ai",
-        name: "Alex Brooks",
-        title: "Product Designer",
-        role: "VIEWER",
-        passwordHash,
-      },
-    }),
-  ]);
+  function emailFromName(name: string) {
+    const cleaned = name
+      .replace(/,?\s*Ph\.?D\.?/gi, "")
+      .replace(/\([^)]*\)/g, "")
+      .toLowerCase()
+      .replace(/[^a-z\s-]/g, " ")
+      .trim();
+    return `${cleaned.split(/\s+/).join(".")}@cerebri.ai`;
+  }
+
+  const people = [
+    { name: "Alina Deng", title: "Director, Software Quality Assurance", role: "VOTER" },
+    { name: "Annette Cumming", title: "SVP Business Development", role: "VOTER" },
+    { name: "Bareera Gulraiz", title: "Product Engineering Intern", role: "ADMIN" },
+    { name: "Cheryl Besser", title: "Director of Engineering", role: "VOTER" },
+    { name: "Cindy Lewis", title: "VP of Customer Success", role: "VOTER" },
+    { name: "Dmitrii Boldyrev", title: "Data Engineer", role: "VOTER" },
+    { name: "Eyad Khalifeh", title: "Director of Customer Success", role: "VOTER" },
+    { name: "Gabby Silberman", title: "Chief Scientist", role: "VOTER" },
+    { name: "Gerry Nielsen", title: "VP Operations", role: "VOTER" },
+    { name: "Jean Belanger", title: "Founder / CEO", role: "VOTER" },
+    { name: "Jenny Li", title: "Senior Data Scientist", role: "VOTER" },
+    { name: "Justin Ridgway", title: "Senior Software Engineer", role: "VOTER" },
+    { name: "Matthew Beck", title: "Chief Product Officer", role: "ADMIN" },
+    { name: "Mike Daly", title: "Chief Revenue Officer", role: "VOTER" },
+    { name: "Nic Swart", title: "Kubernetes DevOps", role: "VOTER" },
+    { name: "Oscar Villarreal Escamilla", title: "Data Scientist", role: "VOTER" },
+    { name: "Paul Kazmir", title: "Enterprise Architect", role: "VOTER" },
+    { name: "Shane Earley", title: "VP Special Projects", role: "VOTER" },
+    { name: "Shawnda Witterstaetter", title: "VP Customer Success", role: "VOTER" },
+    { name: "Sheven Irving", title: "Hotel Partnerships Manager", role: "VOTER" },
+    { name: "Steve Harter", title: "Chief Technology Officer", role: "VOTER" },
+    { name: "Tanya Sicre", title: "Program Manager", role: "VOTER" },
+    { name: "Xuxin Chen", title: "Machine Learning Engineer", role: "VOTER" },
+  ] as const;
+
+  const created = [];
+  for (const person of people) {
+    created.push(
+      await prisma.user.create({
+        data: {
+          email: emailFromName(person.name),
+          name: person.name,
+          title: person.title,
+          role: person.role,
+          passwordHash,
+        },
+      }),
+    );
+  }
+
+  const byEmail = Object.fromEntries(created.map((u) => [u.email, u]));
+  const owner = byEmail["matthew.beck@cerebri.ai"];
+  const facilitator = byEmail["bareera.gulraiz@cerebri.ai"];
+  if (!owner || !facilitator) {
+    throw new Error("Seed roster is missing the owner or facilitator.");
+  }
 
   for (const t of TEMPLATES) {
     await prisma.template.create({
@@ -103,16 +95,8 @@ async function main() {
 
   const opensAt = new Date();
   const closesAt = new Date(opensAt.getTime() + 72 * 60 * 60 * 1000);
-  const roster = [
-    { userId: ceo.id, role: "VOTER" },
-    { userId: cpo.id, role: "VOTER" },
-    { userId: cto.id, role: "VOTER" },
-    { userId: design.id, role: "VOTER" },
-    { userId: finance.id, role: "VOTER" },
-    { userId: cs.id, role: "VOTER" },
-    { userId: viewer.id, role: "VIEWER" },
-  ];
-  const voters = [ceo, cpo, cto, design, finance, cs];
+  const roster = created.map((u) => ({ userId: u.id, role: "VOTER" }));
+  const voters = created;
 
   const darkCards = [
     ["01", "Plane top-left · full copy", "Small airplane, then title, subtitle, and description."],
@@ -280,8 +264,8 @@ async function main() {
         templateKey: "CARD_DESIGN",
         ballotType: "REACTION",
         streamOrder: stream.order,
-        ownerId: cpo.id,
-        facilitatorId: design.id,
+        ownerId: owner.id,
+        facilitatorId: facilitator.id,
         opensAt,
         closesAt,
         quorumPercent: 70,
@@ -292,7 +276,7 @@ async function main() {
     await prisma.auditEvent.create({
       data: {
         action: "decision.opened",
-        userId: design.id,
+        userId: facilitator.id,
         decisionId: decision.id,
         metadata: JSON.stringify({ seed: true, stream: stream.order }),
       },
@@ -309,10 +293,9 @@ async function main() {
   }
 
   console.log("Seeded Cerebri AI Decision Room");
-  console.log("  Facilitator: nora.klein@cerebri.ai / cerebri");
-  console.log("  Owner:       julian.okonkwo@cerebri.ai / cerebri");
-  console.log("  Voter:       amira.hassan@cerebri.ai / cerebri");
-  console.log("  Viewer:      alex.brooks@cerebri.ai / cerebri");
+  console.log(`  ${created.length} people on the login roster`);
+  console.log("  Facilitator: bareera.gulraiz@cerebri.ai / cerebri");
+  console.log("  Owner:       matthew.beck@cerebri.ai / cerebri");
 }
 
 main()

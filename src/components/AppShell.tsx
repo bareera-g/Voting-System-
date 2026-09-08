@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { logoutAction } from "@/actions/auth";
 import type { User } from "@prisma/client";
+import { CerebriLogo } from "@/components/CerebriLogo";
 
 export function AppShell({
   user,
@@ -13,21 +14,23 @@ export function AppShell({
 }) {
   return (
     <div className="min-h-screen">
-      <header className="border-b border-line">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-6 px-6 py-4">
-          <Link href="/" className="serif text-lg tracking-tight">
-            Cerebri AI
-          </Link>
+      <header className="border-b border-line bg-white">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-6 px-6 py-3">
+          <CerebriLogo />
           <nav className="flex items-center gap-5 text-sm">
             <Link
               href="/"
-              className={tab === "vote" ? "font-medium text-ink" : "text-muted hover:text-ink"}
+              className={
+                tab === "vote" ? "font-medium text-teal" : "text-muted hover:text-ink"
+              }
             >
               Vote
             </Link>
             <Link
               href="/board"
-              className={tab === "board" ? "font-medium text-ink" : "text-muted hover:text-ink"}
+              className={
+                tab === "board" ? "font-medium text-teal" : "text-muted hover:text-ink"
+              }
             >
               Board
             </Link>
@@ -43,6 +46,9 @@ export function AppShell({
         </div>
       </header>
       <div className="mx-auto max-w-3xl px-6 py-10">{children}</div>
+      <p className="mx-auto max-w-3xl px-6 pb-8 text-xs text-muted">
+        © Cerebri AI Inc.
+      </p>
     </div>
   );
 }

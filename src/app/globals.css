@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --paper: #f6f3ec;
-  --paper-2: #efeae0;
-  --ink: #1a2332;
-  --muted: #5c6570;
-  --line: #e2dcd0;
-  --teal: #1f4d4a;
-  --teal-2: #3d9b8f;
-  --gold: #8a6d3b;
-  --alert: #8a4b2e;
-  --white: #fffcf7;
+  --paper: #f3f4f6;
+  --paper-2: #f1f2f9;
+  --ink: #2d323a;
+  --muted: #6d798a;
+  --line: #e2e2e2;
+  --teal: #d02c71;
+  --teal-2: #259dc6;
+  --gold: #25387a;
+  --alert: #a6235a;
+  --white: #ffffff;
 }
 
 @theme inline {
@@ -25,7 +25,7 @@
   --color-alert: var(--alert);
   --color-white: var(--white);
   --font-sans: var(--font-geist-sans);
-  --font-serif: var(--font-newsreader);
+  --font-serif: var(--font-geist-sans);
 }
 
 html,
@@ -44,7 +44,9 @@ a {
 }
 
 .serif {
-  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 650;
+  letter-spacing: -0.03em;
 }
 
 .panel {
@@ -74,11 +76,11 @@ a {
 
 .btn-primary {
   background: var(--teal);
-  color: #f6f3ec;
+  color: #fff;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #163b39;
+  background: #a6235a;
 }
 
 .btn-secondary {
@@ -127,18 +129,18 @@ a {
 }
 
 .heat-high {
-  background: #1f4d4a;
-  color: #f6f3ec;
+  background: #d02c71;
+  color: #fff;
 }
 .heat-mid {
-  background: #7aa39a;
-  color: #1a2332;
+  background: #259dc6;
+  color: #fff;
 }
 .heat-low {
-  background: #e6dfd2;
-  color: #1a2332;
+  background: #cfdef4;
+  color: #25387a;
 }
 .heat-empty {
-  background: #f3eee4;
-  color: #9aa3ae;
+  background: #f1f2f9;
+  color: #a2adbb;
 }

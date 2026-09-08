@@ -16,6 +16,10 @@ const newsreader = Newsreader({
 export const metadata: Metadata = {
   title: "Cerebri AI",
   description: "Vote on AIQ card designs.",
+  icons: {
+    icon: "/brand/favicon.png",
+    apple: "/brand/favicon.png",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

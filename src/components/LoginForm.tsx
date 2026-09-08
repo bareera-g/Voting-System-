@@ -26,7 +26,7 @@ export function LoginForm({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="max-h-[70vh] space-y-2 overflow-y-auto pr-1">
       {people.map((p) => (
         <form key={p.email} action={onSubmit}>
           <input type="hidden" name="next" value={next || "/"} />
