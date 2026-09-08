@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="540" viewBox="0 0 880 540" fill="none">
+  <rect width="880" height="540" rx="28" fill="#F6F3EC"/>
+  <rect x="48" y="190" width="784" height="160" rx="20" fill="#1A2332"/>
+  <circle cx="100" cy="270" r="18" fill="#3D9B8F"/>
+  <text x="140" y="250" fill="#C9B896" font-family="ui-sans-serif, system-ui" font-size="12" letter-spacing="1.4">EXCEPTION</text>
+  <text x="140" y="286" fill="#F6F3EC" font-family="Georgia, serif" font-size="28">$86 conflict · Uber</text>
+  <text x="620" y="250" fill="#9AA3AE" font-family="ui-sans-serif, system-ui" font-size="12">ALIGNED TRIP</text>
+  <text x="620" y="286" fill="#F6F3EC" font-family="Georgia, serif" font-size="28">$6,740</text>
+  <text x="140" y="322" fill="#8FA39A" font-family="ui-sans-serif, system-ui" font-size="13">Next action · reconcile with expense report</text>
+  <text x="48" y="160" fill="#5C6570" font-family="ui-sans-serif, system-ui" font-size="14">Scan strip · two-second read</text>
+  <text x="48" y="400" fill="#1A2332" font-family="Georgia, serif" font-size="20">Status, amount, exception, action. Nothing else.</text>
+</svg>

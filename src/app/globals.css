@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #f6f3ec;
+  --paper-2: #efeae0;
+  --ink: #1a2332;
+  --muted: #5c6570;
+  --line: #e2dcd0;
+  --teal: #1f4d4a;
+  --teal-2: #3d9b8f;
+  --gold: #8a6d3b;
+  --alert: #8a4b2e;
+  --white: #fffcf7;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-teal: var(--teal);
+  --color-teal-2: var(--teal-2);
+  --color-gold: var(--gold);
+  --color-alert: var(--alert);
+  --color-white: var(--white);
+  --font-sans: var(--font-geist-sans);
+  --font-serif: var(--font-newsreader);
+}
+
+html,
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+}
+
+.serif {
+  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+}
+
+.panel {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 1.25rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  padding: 0.65rem 1.15rem;
+  font-size: 0.9rem;
+  font-weight: 550;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--teal);
+  color: #f6f3ec;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #163b39;
+}
+
+.btn-secondary {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--paper-2);
+}
+
+.btn-danger {
+  background: transparent;
+  border-color: var(--alert);
+  color: var(--alert);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.field label {
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.field input,
+.field textarea,
+.field select {
+  border: 1px solid var(--line);
+  background: var(--white);
+  border-radius: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  color: var(--ink);
+  font: inherit;
+}
+
+.field textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+.heat-high {
+  background: #1f4d4a;
+  color: #f6f3ec;
+}
+.heat-mid {
+  background: #7aa39a;
+  color: #1a2332;
+}
+.heat-low {
+  background: #e6dfd2;
+  color: #1a2332;
+}
+.heat-empty {
+  background: #f3eee4;
+  color: #9aa3ae;
+}

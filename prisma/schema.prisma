@@ -1,0 +1,207 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x", "linux-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  title        String
+  role         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  ownedDecisions       Decision[]      @relation("Owner")
+  facilitatedDecisions Decision[]      @relation("Facilitator")
+  invitations          Invitation[]
+  ballots              Ballot[]
+  outcomes             Outcome[]
+  auditEvents          AuditEvent[]
+  notifications        Notification[]
+}
+
+model Template {
+  id                   String @id @default(cuid())
+  key                  String @unique
+  name                 String
+  description          String
+  defaultBrief         String
+  defaultWindowHours   Int    @default(72)
+  defaultQuorumPercent Int    @default(70)
+  criteriaJson         String
+}
+
+model Decision {
+  id            String    @id @default(cuid())
+  title         String
+  brief         String
+  status        String    @default("DRAFT")
+  templateKey   String    @default("CUSTOM")
+  ballotType    String    @default("REACTION")
+  streamOrder   Int       @default(0)
+  ownerId       String
+  facilitatorId String
+  opensAt       DateTime?
+  closesAt      DateTime?
+  quorumPercent Int       @default(70)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  owner         User           @relation("Owner", fields: [ownerId], references: [id])
+  facilitator   User           @relation("Facilitator", fields: [facilitatorId], references: [id])
+  options       Option[]
+  criteria      Criterion[]
+  invitations   Invitation[]
+  ballots       Ballot[]
+  outcome       Outcome?
+  auditEvents   AuditEvent[]
+  notifications Notification[]
+}
+
+model Option {
+  id         String @id @default(cuid())
+  decisionId String
+  label      String
+  caption    String @default("")
+  jobs       String @default("")
+  imageUrl   String
+  figmaUrl   String @default("")
+  sortOrder  Int    @default(0)
+
+  decision Decision     @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+  scores   BallotScore[]
+  ranks    BallotRank[]
+  reactions BallotReaction[]
+  outcomes Outcome[]
+}
+
+model Criterion {
+  id          String @id @default(cuid())
+  decisionId  String
+  name        String
+  description String
+  weight      Float  @default(1)
+  sortOrder   Int    @default(0)
+
+  decision Decision      @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+  scores   BallotScore[]
+}
+
+model Invitation {
+  id         String    @id @default(cuid())
+  decisionId String
+  userId     String
+  role       String    @default("VOTER")
+  remindedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  decision Decision @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([decisionId, userId])
+}
+
+model Ballot {
+  id          String    @id @default(cuid())
+  decisionId  String
+  userId      String
+  rationale   String    @default("")
+  submittedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  decision Decision      @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+  user     User          @relation(fields: [userId], references: [id])
+  scores   BallotScore[]
+  ranks    BallotRank[]
+  reactions BallotReaction[]
+
+  @@unique([decisionId, userId])
+}
+
+model BallotScore {
+  id          String @id @default(cuid())
+  ballotId    String
+  optionId    String
+  criterionId String
+  score       Int
+
+  ballot    Ballot    @relation(fields: [ballotId], references: [id], onDelete: Cascade)
+  option    Option    @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  criterion Criterion @relation(fields: [criterionId], references: [id], onDelete: Cascade)
+
+  @@unique([ballotId, optionId, criterionId])
+}
+
+model BallotRank {
+  id       String @id @default(cuid())
+  ballotId String
+  optionId String
+  rank     Int
+
+  ballot Ballot @relation(fields: [ballotId], references: [id], onDelete: Cascade)
+  option Option @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@unique([ballotId, optionId])
+}
+
+model BallotReaction {
+  id         String @id @default(cuid())
+  ballotId   String
+  optionId   String
+  sentiment  String
+  improve    String @default("")
+
+  ballot Ballot @relation(fields: [ballotId], references: [id], onDelete: Cascade)
+  option Option @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@unique([ballotId, optionId])
+}
+
+model Outcome {
+  id             String   @id @default(cuid())
+  decisionId     String   @unique
+  type           String
+  chosenOptionId String?
+  rationale      String
+  hybridNotes    String   @default("")
+  isOverride     Boolean  @default(false)
+  ownerId        String
+  createdAt      DateTime @default(now())
+
+  decision     Decision @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+  chosenOption Option?  @relation(fields: [chosenOptionId], references: [id])
+  owner        User     @relation(fields: [ownerId], references: [id])
+}
+
+model AuditEvent {
+  id         String   @id @default(cuid())
+  decisionId String?
+  userId     String?
+  action     String
+  metadata   String   @default("{}")
+  createdAt  DateTime @default(now())
+
+  decision Decision? @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+  user     User?     @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id         String    @id @default(cuid())
+  userId     String
+  decisionId String?
+  channel    String
+  title      String
+  body       String
+  sentAt     DateTime  @default(now())
+  readAt     DateTime?
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  decision Decision? @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+}

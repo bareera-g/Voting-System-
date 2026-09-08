@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="540" viewBox="0 0 880 540" fill="none">
+  <rect width="880" height="540" rx="28" fill="#F3EEE4"/>
+  <rect x="28" y="28" width="824" height="484" rx="22" fill="#1A2332"/>
+  <rect x="28" y="28" width="824" height="72" rx="22" fill="#1A2332"/>
+  <rect x="28" y="78" width="824" height="22" fill="#1A2332"/>
+  <text x="56" y="72" fill="#C9B896" font-family="Georgia, serif" font-size="18">AIQ · Corporate card</text>
+  <text x="620" y="72" fill="#8FA39A" font-family="ui-sans-serif, system-ui" font-size="13">Aligned 12m ago</text>
+  <text x="56" y="118" fill="#F6F3EC" font-family="Georgia, serif" font-size="28">Dense ledger</text>
+  <text x="56" y="148" fill="#9AA3AE" font-family="ui-sans-serif, system-ui" font-size="14">All T&amp;E facts on one surface</text>
+  <rect x="56" y="172" width="768" height="1" fill="#2C3646"/>
+  <g font-family="ui-sans-serif, system-ui" font-size="13">
+    <text x="56" y="200" fill="#8FA39A">Merchant</text>
+    <text x="320" y="200" fill="#8FA39A">Type</text>
+    <text x="470" y="200" fill="#8FA39A">Source</text>
+    <text x="620" y="200" fill="#8FA39A">Aligned</text>
+    <text x="740" y="200" fill="#8FA39A">Amount</text>
+    <text x="56" y="236" fill="#F6F3EC">United 4821 · LHRJFK</text>
+    <text x="320" y="236" fill="#C9B896">Air</text>
+    <text x="470" y="236" fill="#D7E0D4">TMC + card</text>
+    <text x="620" y="236" fill="#D7E0D4">Match</text>
+    <text x="740" y="236" fill="#F6F3EC">$1,842</text>
+    <text x="56" y="272" fill="#F6F3EC">Four Seasons Chicago</text>
+    <text x="320" y="272" fill="#C9B896">Hotel</text>
+    <text x="470" y="272" fill="#D7E0D4">Card</text>
+    <text x="620" y="272" fill="#E6C07B">Ghost</text>
+    <text x="740" y="272" fill="#F6F3EC">$612</text>
+    <text x="56" y="308" fill="#F6F3EC">Uber · client dinner</text>
+    <text x="320" y="308" fill="#C9B896">Ground</text>
+    <text x="470" y="308" fill="#E07A5F">Expense only</text>
+    <text x="620" y="308" fill="#E07A5F">Conflict</text>
+    <text x="740" y="308" fill="#F6F3EC">$86</text>
+    <text x="56" y="344" fill="#F6F3EC">Amex virtual · supplier</text>
+    <text x="320" y="344" fill="#C9B896">Virtual</text>
+    <text x="470" y="344" fill="#D7E0D4">Card + ERP</text>
+    <text x="620" y="344" fill="#D7E0D4">Match</text>
+    <text x="740" y="344" fill="#F6F3EC">$4,200</text>
+  </g>
+  <rect x="56" y="380" width="768" height="1" fill="#2C3646"/>
+  <text x="56" y="420" fill="#9AA3AE" font-family="ui-sans-serif, system-ui" font-size="13">Trip total aligned</text>
+  <text x="56" y="458" fill="#F6F3EC" font-family="Georgia, serif" font-size="36">$6,740</text>
+  <text x="620" y="458" fill="#E07A5F" font-family="ui-sans-serif, system-ui" font-size="14">1 conflict · 1 ghost</text>
+</svg>
