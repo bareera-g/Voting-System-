@@ -52,12 +52,22 @@ export default async function BoardPage() {
                     return (
                       <li key={row.id} className="flex items-center gap-4 py-2">
                         <span className="w-5 shrink-0 text-sm text-muted">{i + 1}</span>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={`${row.imageUrl}?v=10`}
-                          alt=""
-                          className="h-14 w-14 shrink-0 object-contain"
-                        />
+                        {row.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={
+                              row.imageUrl.startsWith("data:")
+                                ? row.imageUrl
+                                : `${row.imageUrl}?v=10`
+                            }
+                            alt=""
+                            className="h-14 w-14 shrink-0 object-contain"
+                          />
+                        ) : (
+                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-line bg-white px-1 text-center text-[10px] font-medium leading-tight text-muted">
+                            {row.label.slice(0, 18)}
+                          </div>
+                        )}
                         <div className="min-w-0 flex-1">
                           <p className="truncate">{row.label}</p>
                           <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-paper-2">

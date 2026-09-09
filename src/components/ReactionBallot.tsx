@@ -14,6 +14,15 @@ function isIcon(option: Option) {
   return option.imageUrl.includes("/cards/icon-");
 }
 
+function hasImage(option: Option) {
+  return Boolean(option.imageUrl?.trim());
+}
+
+function optionVisualSrc(imageUrl: string) {
+  if (imageUrl.startsWith("data:")) return imageUrl;
+  return `${imageUrl}?v=10`;
+}
+
 export function ReactionBallot({
   decisionId,
   options,
@@ -173,22 +182,37 @@ function OptionBlock({
     ? option.label.split(" · ")[1]
     : option.label;
   const board = option.imageUrl.startsWith("/mockups/");
+  const showImage = hasImage(option);
 
   return (
     <section className="overflow-hidden">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={`${option.imageUrl}?v=10`}
-        alt={option.label}
-        className={`mx-auto w-full object-contain ${
-          compact ? "max-h-28" : board ? "max-h-[480px]" : "max-h-[320px]"
-        }`}
-      />
+      {showImage ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={optionVisualSrc(option.imageUrl)}
+          alt={option.label}
+          className={`mx-auto w-full object-contain ${
+            compact ? "max-h-28" : board ? "max-h-[480px]" : "max-h-[320px]"
+          }`}
+        />
+      ) : (
+        <div
+          className={`flex items-center justify-center rounded-2xl border border-line bg-white px-4 text-center ${
+            compact ? "min-h-24" : "min-h-36"
+          }`}
+        >
+          <p className={`font-medium ${compact ? "text-base" : "serif text-2xl"}`}>
+            {name}
+          </p>
+        </div>
+      )}
       <div className={`space-y-3 ${compact ? "pt-3" : "p-4"}`}>
         <div>
-          <h3 className="text-base font-medium">{name}</h3>
+          {showImage ? <h3 className="text-base font-medium">{name}</h3> : null}
           {option.caption ? (
-            <p className="mt-1 text-sm text-muted">{option.caption}</p>
+            <p className={`text-sm text-muted ${showImage ? "mt-1" : ""}`}>
+              {option.caption}
+            </p>
           ) : null}
         </div>
         <input type="hidden" name={`sentiment:${option.id}`} value={sentiment} />

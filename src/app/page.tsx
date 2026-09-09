@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requirePageUser } from "@/lib/guard";
 import { AppShell } from "@/components/AppShell";
+import { CreateVoteModal } from "@/components/CreateVoteModal";
 import { isOpen } from "@/lib/access";
 
 export default async function HomePage() {
@@ -35,8 +36,13 @@ export default async function HomePage() {
 
   return (
     <AppShell user={user} tab="vote">
-      <h1 className="serif text-4xl">Hi, {user.name.split(" ")[0]}</h1>
-      <p className="mt-2 text-muted">{heading}</p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="serif text-4xl">Hi, {user.name.split(" ")[0]}</h1>
+          <p className="mt-2 text-muted">{heading}</p>
+        </div>
+        <CreateVoteModal />
+      </div>
 
       {todo.length > 0 ? (
         <ul className="mt-8 space-y-3">
