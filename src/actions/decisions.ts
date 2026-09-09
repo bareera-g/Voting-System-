@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth";
 import { audit } from "@/lib/audit";
 import { canVote } from "@/lib/access";
-import { getDecision, nextVotePath, refreshQuorum } from "@/lib/decisions";
+import { nextVotePath, refreshQuorum } from "@/lib/decisions";
 
 const MAX_IMAGE_CHARS = 2_100_000; // ~1.5MB binary as base64 data URL
 
@@ -114,7 +114,19 @@ export async function submitBallotAction(formData: FormData) {
   const user = await requireUser();
   const id = String(formData.get("decisionId") || "");
   const rationale = String(formData.get("rationale") || "").trim();
-  const decision = await getDecision(id);
+
+  const decision = await prisma.decision.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      status: true,
+      options: { select: { id: true }, orderBy: { sortOrder: "asc" } },
+      invitations: {
+        where: { userId: user.id },
+        select: { id: true, userId: true, role: true },
+      },
+    },
+  });
   if (!decision) return { error: "Decision not found." };
   if (!canVote(user, decision, decision.invitations)) {
     return { error: "You are not a voter on this open decision." };
@@ -135,14 +147,17 @@ export async function submitBallotAction(formData: FormData) {
 
   const existing = await prisma.ballot.findUnique({
     where: { decisionId_userId: { decisionId: id, userId: user.id } },
+    select: { id: true, submittedAt: true },
   });
   if (existing?.submittedAt) {
     return { error: "You already voted on this one." };
   }
+
   const ballot = existing
     ? await prisma.ballot.update({
         where: { id: existing.id },
         data: { rationale, submittedAt: new Date() },
+        select: { id: true },
       })
     : await prisma.ballot.create({
         data: {
@@ -151,17 +166,21 @@ export async function submitBallotAction(formData: FormData) {
           rationale,
           submittedAt: new Date(),
         },
+        select: { id: true },
       });
 
   await prisma.ballotReaction.deleteMany({ where: { ballotId: ballot.id } });
   await prisma.ballotReaction.createMany({
     data: reactions.map((r) => ({ ...r, ballotId: ballot.id })),
   });
-  await audit(existing ? "ballot.updated" : "ballot.submitted", {
-    userId: user.id,
-    decisionId: id,
-  });
-  await refreshQuorum(id);
-  revalidateDecision(id);
-  redirect(await nextVotePath(user.id, id));
+
+  const [, nextPath] = await Promise.all([
+    refreshQuorum(id),
+    nextVotePath(user.id, id),
+    audit("ballot.submitted", { userId: user.id, decisionId: id }),
+  ]);
+
+  revalidatePath("/");
+  revalidatePath("/board");
+  redirect(nextPath);
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { submitBallotAction } from "@/actions/decisions";
 
 type Option = {
@@ -38,7 +38,7 @@ export function ReactionBallot({
   };
 }) {
   const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
+  const [pending, startTransition] = useTransition();
   const [sentiments, setSentiments] = useState<Record<string, string>>(
     Object.fromEntries(
       (initial?.reactions ?? []).map((r) => [r.optionId, r.sentiment]),
@@ -52,18 +52,23 @@ export function ReactionBallot({
   const icons = options.filter(isIcon);
   const travel = icons.filter((o) => o.label.startsWith("Travel"));
   const contract = icons.filter((o) => o.label.startsWith("Contract"));
+  const busy = pending || locked;
 
-  async function onSubmit(formData: FormData) {
-    if (locked) return;
-    setPending(true);
+  function onSubmit(formData: FormData) {
+    if (locked || pending) return;
     setError(null);
-    const result = await submitBallotAction(formData);
-    if (result?.error) setError(result.error);
-    setPending(false);
+    startTransition(async () => {
+      const result = await submitBallotAction(formData);
+      if (result?.error) setError(result.error);
+    });
   }
 
   return (
-    <form action={onSubmit} className="space-y-8 pb-24">
+    <form
+      action={onSubmit}
+      className={`space-y-8 pb-24 ${pending ? "pointer-events-none opacity-70" : ""}`}
+      aria-busy={pending}
+    >
       <input type="hidden" name="decisionId" value={decisionId} />
       <input type="hidden" name="rationale" value="" />
       {locked ? (
@@ -80,7 +85,7 @@ export function ReactionBallot({
             initial?.reactions.find((r) => r.optionId === option.id)?.improve
           }
           compact={false}
-          locked={locked}
+          locked={busy}
           onSentiment={(value) =>
             setSentiments((s) => ({ ...s, [option.id]: value }))
           }
@@ -92,7 +97,7 @@ export function ReactionBallot({
           options={travel}
           sentiments={sentiments}
           initial={initial}
-          locked={locked}
+          locked={busy}
           onSentiment={(id, value) =>
             setSentiments((s) => ({ ...s, [id]: value }))
           }
@@ -104,7 +109,7 @@ export function ReactionBallot({
           options={contract}
           sentiments={sentiments}
           initial={initial}
-          locked={locked}
+          locked={busy}
           onSentiment={(id, value) =>
             setSentiments((s) => ({ ...s, [id]: value }))
           }
@@ -118,7 +123,11 @@ export function ReactionBallot({
             type="submit"
             disabled={pending || !complete}
           >
-            {pending ? "Saving…" : complete ? "Submit" : "Like or don’t like each one"}
+            {pending
+              ? "Saving your vote…"
+              : complete
+                ? "Submit"
+                : "Like or don’t like each one"}
           </button>
         </div>
       )}
@@ -191,6 +200,8 @@ function OptionBlock({
         <img
           src={optionVisualSrc(option.imageUrl)}
           alt={option.label}
+          loading="lazy"
+          decoding="async"
           className={`mx-auto w-full object-contain ${
             compact ? "max-h-28" : board ? "max-h-[480px]" : "max-h-[320px]"
           }`}

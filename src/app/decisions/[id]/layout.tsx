@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requirePageUser } from "@/lib/guard";
-import { getDecision } from "@/lib/decisions";
-import { canViewDecision, isOpen } from "@/lib/access";
+import { getDecisionChrome } from "@/lib/decisions";
+import { canViewDecision } from "@/lib/access";
 import { AppShell } from "@/components/AppShell";
 import { prisma } from "@/lib/prisma";
 
@@ -15,18 +15,23 @@ export default async function DecisionLayout({
 }) {
   const user = await requirePageUser();
   const { id } = await params;
-  const decision = await getDecision(id);
+  const decision = await getDecisionChrome(id, user.id);
   if (!decision || !canViewDecision(user, decision, decision.invitations)) {
     notFound();
   }
 
-  const invitations = await prisma.invitation.findMany({
-    where: { userId: user.id, role: "VOTER" },
-    include: { decision: true },
+  const open = await prisma.invitation.findMany({
+    where: {
+      userId: user.id,
+      role: "VOTER",
+      decision: { status: { in: ["OPEN", "QUORUM_MET"] } },
+    },
+    select: {
+      decisionId: true,
+      decision: { select: { streamOrder: true } },
+    },
+    orderBy: { decision: { streamOrder: "asc" } },
   });
-  const open = invitations
-    .filter((i) => isOpen(i.decision.status))
-    .sort((a, b) => a.decision.streamOrder - b.decision.streamOrder);
   const index = open.findIndex((i) => i.decisionId === decision.id);
 
   return (

@@ -15,17 +15,16 @@ export function canFacilitate(
   );
 }
 
-export function getInvite(
-  user: Pick<User, "id">,
-  invitations: Invitation[],
-) {
+type InviteBits = Pick<Invitation, "userId" | "role">;
+
+export function getInvite(user: Pick<User, "id">, invitations: InviteBits[]) {
   return invitations.find((i) => i.userId === user.id);
 }
 
 export function canVote(
   user: Pick<User, "id" | "role">,
   decision: Pick<Decision, "status">,
-  invitations: Invitation[],
+  invitations: InviteBits[],
 ) {
   const invite = getInvite(user, invitations);
   if (!invite || invite.role !== "VOTER") return false;
@@ -35,7 +34,7 @@ export function canVote(
 export function canViewDecision(
   user: Pick<User, "id" | "role">,
   decision: Pick<Decision, "ownerId" | "facilitatorId">,
-  invitations: Invitation[],
+  invitations: InviteBits[],
 ) {
   if (canFacilitate(user, decision)) return true;
   return Boolean(getInvite(user, invitations));
