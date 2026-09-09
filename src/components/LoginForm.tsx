@@ -3,47 +3,41 @@
 import { useState } from "react";
 import { loginAction } from "@/actions/auth";
 
-type Person = { name: string; email: string };
-
-export function LoginForm({
-  next,
-  people,
-}: {
-  next: string;
-  people: Person[];
-}) {
+export function LoginForm({ next }: { next: string }) {
   const [error, setError] = useState<string | null>(null);
-  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
 
   async function onSubmit(formData: FormData) {
     setError(null);
-    setPendingEmail(String(formData.get("email") || ""));
+    setPending(true);
     const result = await loginAction(formData);
     if (result?.error) {
       setError(result.error);
-      setPendingEmail(null);
+      setPending(false);
     }
   }
 
   return (
-    <div className="max-h-[70vh] space-y-2 overflow-y-auto pr-1">
-      {people.map((p) => (
-        <form key={p.email} action={onSubmit}>
-          <input type="hidden" name="next" value={next || "/"} />
-          <input type="hidden" name="email" value={p.email} />
-          <input type="hidden" name="password" value="cerebri" />
-          <button
-            className="panel w-full px-5 py-4 text-left transition hover:border-teal"
-            type="submit"
-            disabled={pendingEmail !== null}
-          >
-            <span className="block font-medium">
-              {pendingEmail === p.email ? "Signing in…" : p.name}
-            </span>
-          </button>
-        </form>
-      ))}
+    <form action={onSubmit} className="space-y-4">
+      <input type="hidden" name="next" value={next || "/"} />
+      <div className="field">
+        <label htmlFor="name">Full name</label>
+        <input
+          id="name"
+          name="name"
+          type="text"
+          autoComplete="name"
+          autoFocus
+          required
+          minLength={2}
+          maxLength={100}
+          placeholder="Enter your full name"
+        />
+      </div>
+      <button className="btn btn-primary w-full" type="submit" disabled={pending}>
+        {pending ? "Signing in…" : "Continue"}
+      </button>
       {error ? <p className="pt-2 text-sm text-alert">{error}</p> : null}
-    </div>
+    </form>
   );
 }

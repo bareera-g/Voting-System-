@@ -2,22 +2,32 @@
 
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { createSession, clearSession, verifyPassword } from "@/lib/auth";
+import { createSession, clearSession } from "@/lib/auth";
 import type { Role } from "@/lib/constants";
 import { audit } from "@/lib/audit";
 import { nextVotePath } from "@/lib/decisions";
 
 export async function loginAction(formData: FormData) {
-  const email = String(formData.get("email") || "")
+  const name = String(formData.get("name") || "")
     .trim()
-    .toLowerCase();
-  const password = String(formData.get("password") || "");
+    .replace(/\s+/g, " ");
   const next = String(formData.get("next") || "/");
 
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user || !(await verifyPassword(password, user.passwordHash))) {
-    return { error: "Couldn’t sign you in." };
+  if (name.length < 2 || name.length > 100) {
+    return { error: "Enter your full name." };
   }
+
+  const matches = await prisma.user.findMany({
+    where: {
+      name: { equals: name, mode: "insensitive" },
+      role: { not: "VIEWER" },
+    },
+    take: 2,
+  });
+  if (matches.length !== 1) {
+    return { error: "We couldn’t find that name on the voter list." };
+  }
+  const user = matches[0];
 
   await createSession({
     id: user.id,

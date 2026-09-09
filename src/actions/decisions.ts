@@ -40,6 +40,9 @@ export async function submitBallotAction(formData: FormData) {
   const existing = await prisma.ballot.findUnique({
     where: { decisionId_userId: { decisionId: id, userId: user.id } },
   });
+  if (existing?.submittedAt) {
+    return { error: "You already voted on this one." };
+  }
   const ballot = existing
     ? await prisma.ballot.update({
         where: { id: existing.id },

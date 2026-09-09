@@ -31,6 +31,7 @@ export default async function BallotPage({
     <ReactionBallot
       decisionId={decision.id}
       options={decision.options}
+      locked={Boolean(ballot?.submittedAt)}
       initial={
         ballot
           ? {

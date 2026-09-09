@@ -18,9 +18,11 @@ export function ReactionBallot({
   decisionId,
   options,
   initial,
+  locked = false,
 }: {
   decisionId: string;
   options: Option[];
+  locked?: boolean;
   initial?: {
     rationale: string;
     reactions: { optionId: string; sentiment: string; improve: string }[];
@@ -43,6 +45,7 @@ export function ReactionBallot({
   const contract = icons.filter((o) => o.label.startsWith("Contract"));
 
   async function onSubmit(formData: FormData) {
+    if (locked) return;
     setPending(true);
     setError(null);
     const result = await submitBallotAction(formData);
@@ -54,6 +57,11 @@ export function ReactionBallot({
     <form action={onSubmit} className="space-y-8 pb-24">
       <input type="hidden" name="decisionId" value={decisionId} />
       <input type="hidden" name="rationale" value="" />
+      {locked ? (
+        <p className="rounded-xl border border-line bg-white px-4 py-3 text-sm text-muted">
+          You already voted on this one.
+        </p>
+      ) : null}
       {boards.map((option) => (
         <OptionBlock
           key={option.id}
@@ -63,6 +71,7 @@ export function ReactionBallot({
             initial?.reactions.find((r) => r.optionId === option.id)?.improve
           }
           compact={false}
+          locked={locked}
           onSentiment={(value) =>
             setSentiments((s) => ({ ...s, [option.id]: value }))
           }
@@ -74,6 +83,7 @@ export function ReactionBallot({
           options={travel}
           sentiments={sentiments}
           initial={initial}
+          locked={locked}
           onSentiment={(id, value) =>
             setSentiments((s) => ({ ...s, [id]: value }))
           }
@@ -85,21 +95,24 @@ export function ReactionBallot({
           options={contract}
           sentiments={sentiments}
           initial={initial}
+          locked={locked}
           onSentiment={(id, value) =>
             setSentiments((s) => ({ ...s, [id]: value }))
           }
         />
       ) : null}
       {error ? <p className="text-sm text-alert">{error}</p> : null}
-      <div className="sticky bottom-0 -mx-6 border-t border-line bg-paper/95 px-6 py-4 backdrop-blur">
-        <button
-          className="btn btn-primary w-full"
-          type="submit"
-          disabled={pending || !complete}
-        >
-          {pending ? "Saving…" : complete ? "Submit" : "Like or don’t like each one"}
-        </button>
-      </div>
+      {locked ? null : (
+        <div className="sticky bottom-0 -mx-6 border-t border-line bg-paper/95 px-6 py-4 backdrop-blur">
+          <button
+            className="btn btn-primary w-full"
+            type="submit"
+            disabled={pending || !complete}
+          >
+            {pending ? "Saving…" : complete ? "Submit" : "Like or don’t like each one"}
+          </button>
+        </div>
+      )}
     </form>
   );
 }
@@ -109,12 +122,14 @@ function IconGroup({
   options,
   sentiments,
   initial,
+  locked,
   onSentiment,
 }: {
   title: string;
   options: Option[];
   sentiments: Record<string, string>;
   initial?: { reactions: { optionId: string; improve: string }[] };
+  locked: boolean;
   onSentiment: (id: string, value: string) => void;
 }) {
   return (
@@ -130,6 +145,7 @@ function IconGroup({
               initial?.reactions.find((r) => r.optionId === option.id)?.improve
             }
             compact
+            locked={locked}
             onSentiment={(value) => onSentiment(option.id, value)}
           />
         ))}
@@ -143,12 +159,14 @@ function OptionBlock({
   sentiment,
   initialImprove,
   compact,
+  locked,
   onSentiment,
 }: {
   option: Option;
   sentiment: string;
   initialImprove?: string;
   compact: boolean;
+  locked: boolean;
   onSentiment: (value: string) => void;
 }) {
   const name = option.label.includes(" · ")
@@ -178,6 +196,7 @@ function OptionBlock({
           <button
             type="button"
             className={`btn flex-1 ${sentiment === "LIKE" ? "btn-primary" : "btn-secondary"}`}
+            disabled={locked}
             onClick={() => onSentiment("LIKE")}
           >
             Like
@@ -185,23 +204,28 @@ function OptionBlock({
           <button
             type="button"
             className={`btn flex-1 ${sentiment === "DISLIKE" ? "btn-danger" : "btn-secondary"}`}
+            disabled={locked}
             onClick={() => onSentiment("DISLIKE")}
           >
             Don’t like
           </button>
         </div>
         {compact ? (
-          <input
-            name={`improve:${option.id}`}
-            defaultValue={initialImprove}
-            placeholder="Optional note"
-            className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm"
-          />
-        ) : (
+          locked && !initialImprove ? null : (
+            <input
+              name={`improve:${option.id}`}
+              defaultValue={initialImprove}
+              placeholder={locked ? "" : "Optional note"}
+              readOnly={locked}
+              className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm"
+            />
+          )
+        ) : locked && !initialImprove ? null : (
           <textarea
             name={`improve:${option.id}`}
             defaultValue={initialImprove}
-            placeholder="Anything you’d change? (optional)"
+            placeholder={locked ? "" : "Anything you’d change? (optional)"}
+            readOnly={locked}
             className="min-h-[3.5rem] w-full rounded-xl border border-line bg-white px-3 py-2 text-sm"
           />
         )}
