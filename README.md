@@ -2,7 +2,7 @@
 
 Internal voting for Cerebri AI design decisions.
 
-Sign in with your full name, like or don’t like each option (once per vote), create new text or image votes, and check **Board** for rankings.
+Sign in with your name, like or don’t like each option (once per vote), create new text or image votes, and check **Board** for rankings.
 
 ## Run
 

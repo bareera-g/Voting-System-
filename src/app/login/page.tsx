@@ -19,9 +19,7 @@ export default async function LoginPage({
       <CerebriLogo size="lg" href="/login" />
       <p className="mt-6 text-sm font-medium text-teal">AIQ card designs</p>
       <h1 className="serif mt-2 text-4xl">Vote</h1>
-      <p className="mt-3 mb-6 text-muted">
-        Enter your full name as it appears on the voter list.
-      </p>
+      <p className="mt-3 mb-6 text-muted">Enter your name to start.</p>
       <LoginForm next={destination} />
       <p className="mt-10 text-xs text-muted">© Cerebri AI Inc.</p>
     </main>

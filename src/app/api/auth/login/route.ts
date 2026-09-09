@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/auth";
 import type { Role } from "@/lib/constants";
 import { audit } from "@/lib/audit";
 import { nextVotePath } from "@/lib/decisions";
+import { findOrCreateVoterByName } from "@/lib/name-login";
 
 export async function POST(req: Request) {
   try {
@@ -17,25 +17,12 @@ export async function POST(req: Request) {
 
     if (name.length < 2 || name.length > 100) {
       return NextResponse.json(
-        { error: "Enter your full name." },
+        { error: "Enter your name." },
         { status: 400 },
       );
     }
 
-    const matches = await prisma.user.findMany({
-      where: {
-        name: { equals: name, mode: "insensitive" },
-        role: { not: "VIEWER" },
-      },
-      take: 2,
-    });
-    if (matches.length !== 1) {
-      return NextResponse.json(
-        { error: "We couldn’t find that name on the voter list." },
-        { status: 401 },
-      );
-    }
-    const user = matches[0];
+    const user = await findOrCreateVoterByName(name);
     await createSession({
       id: user.id,
       email: user.email,
@@ -56,7 +43,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Name login failed", error);
     return NextResponse.json(
-      { error: "Couldn’t reach the voter list. Try again in a minute." },
+      { error: "Couldn’t sign you in. Try again in a minute." },
       { status: 500 },
     );
   }

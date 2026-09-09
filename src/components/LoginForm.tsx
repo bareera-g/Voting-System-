@@ -51,7 +51,7 @@ export function LoginForm({ next }: { next: string }) {
           required
           minLength={2}
           maxLength={100}
-          placeholder="Enter your full name"
+          placeholder="Enter your name"
         />
       </div>
       <button className="btn btn-primary w-full" type="submit" disabled={pending}>
