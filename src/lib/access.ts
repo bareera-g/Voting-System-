@@ -41,10 +41,6 @@ export function canViewDecision(
   return Boolean(getInvite(user, invitations));
 }
 
-export function canSeeNamedResults(status: string) {
-  return status === "CLOSED" || status === "ARCHIVED";
-}
-
 export function isOpen(status: string) {
   return status === "OPEN" || status === "QUORUM_MET";
 }

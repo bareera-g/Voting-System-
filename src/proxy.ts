@@ -13,11 +13,9 @@ export async function proxy(req: NextRequest) {
   const publicPath =
     pathname === "/login" ||
     pathname.startsWith("/api/auth") ||
-    pathname.startsWith("/api/cron") ||
     pathname.startsWith("/api/health") ||
     pathname.startsWith("/cards/") ||
     pathname.startsWith("/mockups/") ||
-    pathname.startsWith("/uploads/") ||
     pathname.startsWith("/brand/");
 
   if (publicPath) return NextResponse.next();
