@@ -1,6 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
 import { prisma } from "@/lib/prisma";
-import { hashPassword } from "@/lib/auth";
 
 function emailFromName(name: string) {
   const slug = name
@@ -8,7 +7,10 @@ function emailFromName(name: string) {
     .replace(/[^a-z0-9]+/g, ".")
     .replace(/^\.+|\.+$/g, "")
     .slice(0, 40);
-  const suffix = createHash("sha1").update(name.toLowerCase()).digest("hex").slice(0, 8);
+  const suffix = createHash("sha1")
+    .update(name.toLowerCase())
+    .digest("hex")
+    .slice(0, 8);
   return `${slug || "voter"}.${suffix}@guest.local`;
 }
 
@@ -35,26 +37,37 @@ export async function findOrCreateVoterByName(rawName: string) {
     throw new Error("invalid_name");
   }
 
-  const matches = await prisma.user.findMany({
-    where: {
-      name: { equals: name, mode: "insensitive" },
-      role: { not: "VIEWER" },
-    },
-    take: 2,
-  });
+  const email = emailFromName(name);
 
-  let user = matches.length === 1 ? matches[0] : null;
+  // Prefer the deterministic guest email so retries are stable.
+  let user = await prisma.user.findUnique({ where: { email } });
 
   if (!user) {
-    user = await prisma.user.create({
-      data: {
-        name,
-        email: emailFromName(name),
-        title: "Voter",
-        role: "VOTER",
-        passwordHash: await hashPassword(randomBytes(32).toString("hex")),
+    user = await prisma.user.findFirst({
+      where: {
+        name: { equals: name, mode: "insensitive" },
+        role: { not: "VIEWER" },
       },
     });
+  }
+
+  if (!user) {
+    try {
+      user = await prisma.user.create({
+        data: {
+          name,
+          email,
+          title: "Voter",
+          role: "VOTER",
+          // Unused — name login only. Avoid bcrypt on the request path.
+          passwordHash: `guest:${randomBytes(16).toString("hex")}`,
+        },
+      });
+    } catch {
+      // Race: another request created the same guest email.
+      user = await prisma.user.findUnique({ where: { email } });
+      if (!user) throw new Error("create_failed");
+    }
   }
 
   await inviteToOpenDecisions(user.id);

@@ -5,6 +5,8 @@ import { audit } from "@/lib/audit";
 import { nextVotePath } from "@/lib/decisions";
 import { findOrCreateVoterByName } from "@/lib/name-login";
 
+export const runtime = "nodejs";
+
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
@@ -16,10 +18,7 @@ export async function POST(req: Request) {
       nextRaw.startsWith("/") && !nextRaw.startsWith("//") ? nextRaw : "/";
 
     if (name.length < 2 || name.length > 100) {
-      return NextResponse.json(
-        { error: "Enter your name." },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Enter your name." }, { status: 400 });
     }
 
     const user = await findOrCreateVoterByName(name);
@@ -31,9 +30,17 @@ export async function POST(req: Request) {
       role: user.role as Role,
     });
     await audit("auth.login", { userId: user.id });
-    const destination = next.startsWith("/decisions/")
-      ? next
-      : await nextVotePath(user.id);
+
+    let destination = "/";
+    try {
+      destination = next.startsWith("/decisions/")
+        ? next
+        : await nextVotePath(user.id);
+    } catch (error) {
+      console.error("nextVotePath failed", error);
+      destination = "/";
+    }
+
     return NextResponse.json({
       ok: true,
       name: user.name,
@@ -42,8 +49,12 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error("Name login failed", error);
+    const message = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: "Couldn’t sign you in. Try again in a minute." },
+      {
+        error: "Couldn’t sign you in. Try again in a minute.",
+        detail: process.env.NODE_ENV === "production" ? undefined : message,
+      },
       { status: 500 },
     );
   }
